@@ -4,8 +4,7 @@
 use std::collections::HashMap;
 use std::io;
 
-use cryptarithmetic::Equation;
-use cryptarithmetic::PermGenerator;
+use cryptarithmetic::solve_problem;
 
 fn main() {
     let mut input = String::new();
@@ -15,29 +14,6 @@ fn main() {
         .read_line(&mut input)
         .expect("Error reading info");
 
-    let equation = Equation::new(input);
-
-    let perm_gen = PermGenerator::new(equation.vars.len())
-        .filter(|perm| valid_perm(perm, &equation.first_vars_index));
-
-    let mut var_value: HashMap<char, u8> = HashMap::new();
-    for perm in perm_gen {
-        for (var, value) in equation.vars.iter().zip(perm.iter()) {
-            var_value.insert(*var, *value);
-        }
-
-        if let 1 = equation.eval(&var_value) {
-            println!("{:?}", var_value);
-        }
-    }
-}
-
-//Eliminiate any perms which assign a 0 to a variable that starts a number
-fn valid_perm(perm: &Vec<u8>, first_vars: &Vec<usize>) -> bool {
-    for var in first_vars {
-        if perm[*var] == 0 {
-            return false;
-        }
-    }
-    true
+    //Function will print all answers in dict format
+    solve_problem(input);
 }

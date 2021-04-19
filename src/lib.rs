@@ -2,7 +2,37 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
-pub struct PermGenerator {
+//Takes input, generates permutations, filters obviously wrong ones, and then tests the rest of them
+pub fn solve_problem(input: String) {
+    let equation = Equation::new(input);
+
+    let perm_gen = PermGenerator::new(equation.vars.len())
+        .filter(|perm| valid_perm(perm, &equation.first_vars_index));
+
+    let mut var_value: HashMap<char, u8> = HashMap::new();
+    for perm in perm_gen {
+        for (var, value) in equation.vars.iter().zip(perm.iter()) {
+            var_value.insert(*var, *value);
+        }
+
+        if let 1 = equation.eval(&var_value) {
+            println!("{:?}", var_value);
+        }
+    }
+}
+
+//Eliminiate any perms which assign a 0 to a variable that starts a number
+fn valid_perm(perm: &Vec<u8>, first_vars: &Vec<usize>) -> bool {
+    for var in first_vars {
+        if perm[*var] == 0 {
+            return false;
+        }
+    }
+    true
+}
+
+
+struct PermGenerator {
     pool: [u8; 10],
     indicies: [u8; 10],
     cycles: Vec<usize>,
@@ -10,7 +40,7 @@ pub struct PermGenerator {
 }
 
 impl PermGenerator {
-    pub fn new(letter_count: usize) -> PermGenerator {
+    fn new(letter_count: usize) -> PermGenerator {
         let mut cycles: Vec<usize> = Vec::new();
         for i in (10 - letter_count + 1..11).rev() {
             cycles.push(i)
@@ -57,11 +87,11 @@ impl Iterator for PermGenerator {
     }
 }
 
-pub struct Equation {
+struct Equation {
     //infix: String,
     postfix: VecDeque<String>,
-    pub vars: Vec<char>,
-    pub first_vars_index: Vec<usize>,
+    vars: Vec<char>,
+    first_vars_index: Vec<usize>,
 }
 
 impl Equation {
@@ -71,7 +101,7 @@ impl Equation {
     //
     //Also outputs variables used: vars and first_vars_index. First_vars_index gives indicies for variables in vars that can not be 0 because
     //they are at the front of a number
-    pub fn new(infix: String) -> Equation {
+    fn new(infix: String) -> Equation {
         let mut operator_precedence = HashMap::new();
         operator_precedence.insert('+', 2);
         operator_precedence.insert('-', 2);
