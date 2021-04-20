@@ -14,6 +14,9 @@ fn main() {
         .read_line(&mut input)
         .expect("Error reading info");
 
-    //Function will print all answers in dict format
-    solve_problem(input, threads);
+    //Function will return a vector of all answers in a dict format
+    let answers = solve_problem(input, threads);
+    for ans in answers {
+        println!("{:?}", ans);
+    }
 }
