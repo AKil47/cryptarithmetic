@@ -1,3 +1,10 @@
+//!Multithreaded cryptarithmetic solver.
+//!
+//!(https://en.wikipedia.org/wiki/Verbal_arithmetic)
+//!Takes a string that has an equation filled with letters and identifies which numbers could replace the letters
+//!Generates all possible permutations and uses multiple threads to check each one of them (essentially a DFS)
+//!
+
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -6,7 +13,17 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use std::thread;
 
-//Takes input, generates permutations, filters obviously wrong ones, and then tests the rest of them
+///Takes an input string containing an equation of all letters and the number of threads it should use
+/// The function will generate all possible permutations of the letters and check them using the thread workers
+/// Once finished, it will return a hashmap of all of the found solutions
+///
+/// Example
+/// ```
+/// 
+/// let input = String::from("SEND+MORE=MONEY");
+/// let thread_count = 6;
+/// let answers = solve_problem(input, thread_count);
+/// ```
 pub fn solve_problem(input: String, thread_count: usize) -> Vec<HashMap<char, u8>> {
     //Wrapping with special Atomic Refernce counters to work with threads
     let equation = Arc::new(Equation::new(input));
@@ -115,6 +132,7 @@ impl Iterator for PermGenerator {
     }
 }
 
+///Stores the variables and postfix expression from the input string so that permutations can be generated and checked against the original equation.
 struct Equation {
     //infix: String,
     postfix: VecDeque<String>,

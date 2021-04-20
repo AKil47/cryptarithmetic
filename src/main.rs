@@ -7,7 +7,7 @@ use cryptarithmetic::solve_problem;
 
 fn main() {
     let mut input = String::new();
-    let threads = 6;
+    let thread_count = 6;
 
     println!("Enter Equation: ");
     io::stdin()
@@ -15,7 +15,7 @@ fn main() {
         .expect("Error reading info");
 
     //Function will return a vector of all answers in a dict format
-    let answers = solve_problem(input, threads);
+    let answers = solve_problem(input, thread_count);
     for ans in answers {
         println!("{:?}", ans);
     }
