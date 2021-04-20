@@ -27,20 +27,21 @@ use std::thread;
 pub fn solve_problem(input: String, thread_count: usize) -> Vec<HashMap<char, u8>> {
     //Wrapping with special Atomic Refernce counters to work with threads
     let equation = Arc::new(Equation::new(input));
-    let answers = Arc::new(Mutex::new(vec![]));
+    let answers = Arc::new(Mutex::new(Vec::new()));
 
     //Break iterator into chunks that can be processed. This is more effective than the Mutex Job Queue strategy
     let perms: Vec<Vec<u8>> = PermGenerator::new(equation.vars.len())
         .filter(|perm| valid_perm(perm, &equation.first_vars_index))
         .collect();
-    let mut my_values = perms.into_iter().peekable();
-    let size = my_values.len() / thread_count;
+    //chunking method was inspired by online forumn answer. Might be able to make it better
+    let mut perms_peekable_iter = perms.into_iter().peekable();
+    let size = perms_peekable_iter.len() / thread_count;
 
     //Creating a vector to store thread handles because I need to call join() on them afterwards
     let mut handles = Vec::new();
 
-    while my_values.peek().is_some() {
-        let perms_chunk: Vec<_> = my_values.by_ref().take(size).collect();
+    while perms_peekable_iter.peek().is_some() {
+        let perms_chunk: Vec<_> = perms_peekable_iter.by_ref().take(size).collect();
         let equation = Arc::clone(&equation);
         let answers = Arc::clone(&answers);
         let handle = thread::spawn(move || {
@@ -52,7 +53,6 @@ pub fn solve_problem(input: String, thread_count: usize) -> Vec<HashMap<char, u8
 
                 if let 1 = equation.eval(&var_value) {
                     answers.lock().unwrap().push(var_value.clone());
-                    //println!("{:?}", var_value);
                 }
             }
         });
@@ -225,7 +225,7 @@ impl Equation {
     }
 
     //Given a hashmap of mapping the variable names to numbers, the function checks if the equation is true or false
-    pub fn eval(&self, var_value: &HashMap<char, u8>) -> u64 {
+    fn eval(&self, var_value: &HashMap<char, u8>) -> u64 {
         let mut postfix_copy = self.postfix.clone();
 
         let mut calc_stack: Vec<u64> = vec![];
