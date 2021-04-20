@@ -2,22 +2,43 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
+use std::sync::Arc;
+use std::thread;
+
 //Takes input, generates permutations, filters obviously wrong ones, and then tests the rest of them
-pub fn solve_problem(input: String) {
-    let equation = Equation::new(input);
+pub fn solve_problem(input: String, thread_count: usize) {
+    //Wrapping equation in an Arc so that is works with threads
+    let equation = Arc::new(Equation::new(input));
 
-    let perm_gen = PermGenerator::new(equation.vars.len())
-        .filter(|perm| valid_perm(perm, &equation.first_vars_index));
+    //Break iterator into chunks that can be processed. This is more effective than the Mutex Job Queue strategy
+    let perms: Vec<Vec<u8>> = PermGenerator::new(equation.vars.len())
+        .filter(|perm| valid_perm(perm, &equation.first_vars_index))
+        .collect();
+    let mut my_values = perms.into_iter().peekable();
+    let size = my_values.len() / thread_count;
 
-    let mut var_value: HashMap<char, u8> = HashMap::new();
-    for perm in perm_gen {
-        for (var, value) in equation.vars.iter().zip(perm.iter()) {
-            var_value.insert(*var, *value);
-        }
+    //Creating a vector to store thread handles because I need to call join() on them afterwards
+    let mut handles = Vec::new();
+    while my_values.peek().is_some() {
+        let perms_chunk: Vec<_> = my_values.by_ref().take(size).collect();
+        let equation = Arc::clone(&equation);
+        let handle = thread::spawn(move || {
+            let mut var_value: HashMap<char, u8> = HashMap::new();
+            for perm in perms_chunk {
+                for (var, value) in equation.vars.iter().zip(perm.iter()) {
+                    var_value.insert(*var, *value);
+                }
 
-        if let 1 = equation.eval(&var_value) {
-            println!("{:?}", var_value);
-        }
+                if let 1 = equation.eval(&var_value) {
+                    println!("{:?}", var_value);
+                }
+            }
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
     }
 }
 
@@ -30,7 +51,6 @@ fn valid_perm(perm: &Vec<u8>, first_vars: &Vec<usize>) -> bool {
     }
     true
 }
-
 
 struct PermGenerator {
     pool: [u8; 10],
@@ -118,7 +138,7 @@ impl Equation {
         let mut output_queue = VecDeque::new();
 
         let mut operator_stack = Vec::new();
-        let mut current_word = String::new();   //Placeholder var to combine chars that form a single "number"
+        let mut current_word = String::new(); //Placeholder var to combine chars that form a single "number"
 
         for token in infix.chars() {
             //Extra Logic that groups contiguous chars into a single "number"
@@ -213,7 +233,11 @@ impl Equation {
                 "=" => {
                     let b = calc_stack.pop().unwrap();
                     let a = calc_stack.pop().unwrap();
-                    if a == b {1} else {0}
+                    if a == b {
+                        1
+                    } else {
+                        0
+                    }
                 }
                 //If not an operator, convert to number and push to stack
                 _ => {
