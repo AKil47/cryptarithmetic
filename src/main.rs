@@ -24,9 +24,14 @@ fn main() {
         Err(_) => 6 //Default thread count is 6
     };
 
-    //Function will return a vector of all answers in a dict format
-    let answers = solve_problem(input, thread_count);
-    for ans in answers {
-        println!("{:?}", ans);
+    //Function will return an Option which will have vector of all answers in a dict format if there are any
+    match solve_problem(input, thread_count) {
+        None => println!("No solution found"),
+        Some(answers) => {
+            for answer in answers {
+                println!("{:?}", answer);
+            }
+        }
     }
+    
 }

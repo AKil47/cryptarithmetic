@@ -25,7 +25,7 @@ use std::thread;
 /// let thread_count = 6;
 /// let answers = solve_problem(input, thread_count);
 /// ```
-pub fn solve_problem(input: String, thread_count: usize) -> Vec<HashMap<char, u8>> {
+pub fn solve_problem(input: String, thread_count: usize) -> Option<Vec<HashMap<char, u8>>> {
     //Wrapping with special Atomic Refernce counters to work with threads
     let equation = Arc::new(Equation::new(input));
     let answers = Arc::new(Mutex::new(Vec::new()));
@@ -65,7 +65,13 @@ pub fn solve_problem(input: String, thread_count: usize) -> Vec<HashMap<char, u8
     }
 
     let x: Vec<HashMap<char, u8>> = answers.lock().unwrap().to_vec();
-    x
+
+    if x.len() == 0 {
+        None
+    }
+    else {
+        Some(x)
+    }
 }
 
 //Eliminiate any perms which assign a 0 to a variable that starts a number

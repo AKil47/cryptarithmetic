@@ -20,7 +20,7 @@ cargo run --release
 ```
 
 ## Library Usage
-The `main.rs` file is a simple front end that makes use of the logic. At its core, the solver can be invoked by calling `cryptarithmetic::solve_problems(input, thread_count)` where `input` is a `String` and `thread_count` is a `usize`.
+The `main.rs` file is a simple front end that makes use of the logic. At its core, the solver can be invoked by calling `cryptarithmetic::solve_problems(input, thread_count)` where `input` is a `String` and `thread_count` is a `usize`. The function will return an `Option`. If there are any solutions, they will be represented as a hashmap, connecting each letter to a value. Since there are multiple possibilities for a given problem, the solver will return a vector that contains each solution(s).
 
 ```
 let input = String::from("ODD+ODD=EVEN");
@@ -30,9 +30,14 @@ let thread_count: usize = 5;
 use cryptarithmetic::solve_problems;
 let answers = solve_problems(input, thread_count);
 
-//Go through each answer and print it
-for answer in answers {
-	println!("{:?}", answer);
+//Go through each answer and print it (if there are any)
+match solve_problem(input, thread_count) {
+    None => println!("No solution found"),
+    Some(answers) => {
+        for answer in answers {
+            println!("{:?}", answer);
+        }
+    }
 }
 ```
 
