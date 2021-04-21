@@ -15,7 +15,8 @@ use std::thread;
 
 ///Takes an input string containing an equation of all letters and the number of threads it should use
 /// The function will generate all possible permutations of the letters and check them using the thread workers
-/// Once finished, it will return a hashmap of all of the found solutions
+/// Once finished, it will return a vector containg the solutions. Each solution will be a hashmap connecting the
+/// letters to a number
 ///
 /// Example
 /// ```
