@@ -74,7 +74,7 @@ pub fn solve_problem(input: String, thread_count: usize) -> Option<Vec<HashMap<c
     }
 }
 
-//Eliminiate any perms which assign a 0 to a variable that starts a number
+///Eliminiate any perms which assign a 0 to a variable that starts a number
 fn valid_perm(perm: &Vec<u8>, first_vars: &Vec<usize>) -> bool {
     for var in first_vars {
         if perm[*var] == 0 {
@@ -109,7 +109,7 @@ impl PermGenerator {
 impl Iterator for PermGenerator {
     type Item = Vec<u8>;
 
-    //Permutation Cycle Algorithm inspired by Python itertools
+    ///Permutation Cycle Algorithm inspired by Python itertools
     fn next(&mut self) -> Option<Self::Item> {
         for i in (0..self.letter_count).rev() {
             self.cycles[i] -= 1;
@@ -148,12 +148,12 @@ struct Equation {
 }
 
 impl Equation {
-    //Uses shunting yard algorithm to convert infix (normal) equation into postfix (computer readable)
-    //Note: algo mainly written for learning purposes, should probably migrate to an existing crate for this next time
-    //Ignores any symbol that isn't a letter (e.g. 'A','B'etc.) or an operator('+', '*', etc.)
-    //
-    //Also outputs variables used: vars and first_vars_index. First_vars_index gives indicies for variables in vars that can not be 0 because
-    //they are at the front of a number
+    ///Uses shunting yard algorithm to convert infix (normal) equation into postfix (computer readable)
+    ///Note: algo mainly written for learning purposes, should probably migrate to an existing crate for this next time
+    ///Ignores any symbol that isn't a letter (e.g. 'A','B'etc.) or an operator('+', '*', etc.)
+    ///
+    ///Also outputs variables used: vars and first_vars_index. First_vars_index gives indicies for variables in vars that can not be 0 because
+    ///they are at the front of a number
     fn new(infix: String) -> Equation {
         let mut operator_precedence = HashMap::new();
         operator_precedence.insert('+', 2);
@@ -175,6 +175,7 @@ impl Equation {
 
         for token in infix.chars() {
             //Extra Logic that groups contiguous chars into a single "number"
+            //Ex. ["O", "D", "D"] becomes "ODD"
             if letters.contains(&token) {
                 variables.insert(token);
                 current_word.push(token);
@@ -272,7 +273,7 @@ impl Equation {
                         0
                     }
                 }
-                //If not an operator, convert to number and push to stack
+                //If not an operator, convert word to number and push to stack
                 _ => {
                     let mut value = 0;
                     for (idx, var) in token.chars().rev().enumerate() {
