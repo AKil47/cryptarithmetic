@@ -25,11 +25,17 @@ fn main() {
     };
 
     //Function will return an Option which will have vector of all answers in a dict format if there are any
-    match solve_problem(input, thread_count) {
+    match solve_problem(&input, thread_count) {
         None => println!("No solution found"),
         Some(answers) => {
             for answer in answers {
-                println!("{:?}", answer);
+                for char in input.chars() {
+                    if answer.contains_key(&char) {
+                        print!("{}", answer[&char]);
+                    } else {
+                        print!("{}", char);
+                    }
+                }
             }
         }
     }

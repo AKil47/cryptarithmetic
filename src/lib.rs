@@ -25,7 +25,7 @@ use std::thread;
 /// let thread_count = 6;
 /// let answers = solve_problem(input, thread_count);
 /// ```
-pub fn solve_problem(input: String, thread_count: usize) -> Option<Vec<HashMap<char, u8>>> {
+pub fn solve_problem(input: &String, thread_count: usize) -> Option<Vec<HashMap<char, u8>>> {
     //Wrapping with special Atomic Refernce counters to work with threads
     let equation = Arc::new(Equation::new(input));
     let answers = Arc::new(Mutex::new(Vec::new()));
@@ -154,7 +154,7 @@ impl Equation {
     ///
     ///Also outputs variables used: vars and first_vars_index. First_vars_index gives indicies for variables in vars that can not be 0 because
     ///they are at the front of a number
-    fn new(infix: String) -> Equation {
+    fn new(infix: &String) -> Equation {
         let mut operator_precedence = HashMap::new();
         operator_precedence.insert('+', 2);
         operator_precedence.insert('-', 2);
